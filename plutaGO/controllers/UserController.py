@@ -1,6 +1,6 @@
 import sqlite3
 from models.User import User
-from BaseController import BaseController
+from .BaseController import BaseController
 
 
 class UserController(BaseController):
@@ -58,3 +58,14 @@ class UserController(BaseController):
             if row:
                 return User(*row)
             return None
+
+    def login(self, email, password):
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
+            row = cursor.fetchone()
+            if row:
+                return User(*row)
+            else:
+                print(f"Invalid email or password")
+                return None
