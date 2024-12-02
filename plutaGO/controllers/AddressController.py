@@ -1,20 +1,20 @@
 import sqlite3
-from models.Category import Category  # Załóżmy, że istnieje klasa Category
+from models.Address import Address  # Załóżmy, że istnieje klasa Address
 from BaseController import BaseController
 
 
-class CategoryController(BaseController):
+class AddressController(BaseController):
     def __init__(self, db_path):
         super().__init__(db_path)
 
-    def create(self, category: Category):
+    def create(self, address: Address):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
                 cursor.execute("""
-                INSERT INTO categories (name)
-                VALUES (?)
-                """, (category.name,))
+                INSERT INTO addresses (street, city, local_number)
+                VALUES (?, ?, ?)
+                """, (address.street, address.city, address.local_number))
                 conn.commit()
             except sqlite3.Error as e:
                 print(f"Database error: {e}")
@@ -22,38 +22,39 @@ class CategoryController(BaseController):
     def get_all(self):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM categories')
+            cursor.execute('SELECT * FROM addresses')
             rows = cursor.fetchall()
-            return [Category(*row) for row in rows]
+            return [Address(*row) for row in rows]
 
-    def delete(self, category_id):
+    def delete(self, address_id):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute("DELETE FROM categories WHERE id=?", (category_id,))
+                cursor.execute("DELETE FROM addresses WHERE id=?", (address_id,))
                 conn.commit()
                 return True
             except sqlite3.Error as e:
-                print(f"Error deleting category: {e}")
+                print(f"Error deleting address: {e}")
                 return False
 
-    def update(self, category_id, new_data):
+    def update(self, address_id, new_data):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute("UPDATE categories SET name=? WHERE id=?",
-                                (new_data['name'], category_id))
+                cursor.execute("""
+                UPDATE addresses SET street=?, city=?, local_number=? WHERE id=?
+                """, (new_data['street'], new_data['city'], new_data['local_number'], address_id))
                 conn.commit()
                 return True
             except sqlite3.Error as e:
-                print(f"Error updating category: {e}")
+                print(f"Error updating address: {e}")
                 return False
 
-    def get_category_by_id(self, category_id):
+    def get_address_by_id(self, address_id):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM categories WHERE id=?", (category_id,))
+            cursor.execute("SELECT * FROM addresses WHERE id=?", (address_id,))
             row = cursor.fetchone()
             if row:
-                return Category(*row)
+                return Address(*row)
             return None
