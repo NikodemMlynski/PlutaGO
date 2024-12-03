@@ -47,7 +47,7 @@ CREATE TABLE address (
     local_number INTEGER
 )
 
-CREATE TABLE category (
+CREATE TABLE categories (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT
 )
