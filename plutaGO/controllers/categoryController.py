@@ -1,12 +1,12 @@
 import sqlite3
 from models.Category import Category  # Załóżmy, że istnieje klasa Category
-from BaseController import BaseController
+from .BaseController import BaseController
 
 
 class CategoryController(BaseController):
     def __init__(self, db_path):
         super().__init__(db_path)
-
+ 
     def create(self, category: Category):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()

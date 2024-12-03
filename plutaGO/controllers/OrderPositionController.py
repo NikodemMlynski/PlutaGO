@@ -1,6 +1,6 @@
 import sqlite3
-from models.OrderPosition import OrderPosition  # Załóżmy, że istnieje klasa OrderPosition
-from BaseController import BaseController
+from models.Order_position import OrderPosition  # Załóżmy, że istnieje klasa OrderPosition
+from .BaseController import BaseController
 
 
 class OrderPositionController(BaseController):

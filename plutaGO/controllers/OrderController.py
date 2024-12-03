@@ -1,6 +1,6 @@
 import sqlite3
 from models.Order import Order
-from BaseController import BaseController
+from .BaseController import BaseController
 
 class OrderController(BaseController):
     def __init__(self, db_path):

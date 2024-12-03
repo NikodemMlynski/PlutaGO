@@ -1,6 +1,6 @@
 import sqlite3
 from models.User import User
-from BaseController import BaseController
+from .BaseController import BaseController
 
 
 class PaymentController(BaseController):

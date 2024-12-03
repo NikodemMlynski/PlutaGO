@@ -1,6 +1,6 @@
 import sqlite3
 from models.Address import Address  # Załóżmy, że istnieje klasa Address
-from BaseController import BaseController
+from .BaseController import BaseController
 
 
 class AddressController(BaseController):
