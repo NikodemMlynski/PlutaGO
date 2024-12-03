@@ -1,51 +1,71 @@
 import sqlite3
 from models.User import User
-class UserController:
-    def __init__(self):
-        self.conn = sqlite3.connect('plutaGO.db')
-        self.cursor = self.conn.cursor()
+from .BaseController import BaseController
+
+
+class UserController(BaseController):
+    def __init__(self, db_path):
+        super().__init__(db_path)
 
     def create(self, user: User):
-        # Use user object attributes for insertion
-        try:
-            self.cursor.execute("""
-            INSERT INTO users (name, surname, email, password, role)
-            VALUES (?, ?, ?, ?, ?)
-            """, (user.name, user.surname, user.email, user.password, user.role))
-            self.conn.commit()
-        except sqlite3.Error as e:
-            print(f"Database error: {e}")
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("""
+                INSERT INTO users (name, surname, email, password, role, number_of_pluts)
+                VALUES (?, ?, ?, ?, ?)
+                """, (user.name, user.surname, user.email, user.password, user.role, user.number_of_pluts))
+                conn.commit()
+            except sqlite3.Error as e:
+                print(f"Database error: {e}")
 
     def get_all(self):
-        self.cursor.execute('SELECT * FROM users')
-        rows = self.cursor.fetchall()
-        return [User(*row) for row in rows]
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('SELECT * FROM users')
+            rows = cursor.fetchall()
+            return [User(*row) for row in rows]
 
     def delete(self, user_id):
-        try:
-            self.cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
-            self.conn.commit()
-            return True
-        except sqlite3.Error as e:
-            print(f"Error deleting user: {e}")
-            return False
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("DELETE FROM users WHERE id=?", (user_id,))
+                conn.commit()
+                return True
+            except sqlite3.Error as e:
+                print(f"Error deleting user: {e}")
+                return False
 
     def update(self, user_id, new_data):
-        try:
-            self.cursor.execute("UPDATE users SET name=?, surname=?, email=?, password=?, role=? WHERE id=?",
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            try:
+                cursor.execute("UPDATE users SET name=?, surname=?, email=?, password=?, role=?, number_of_pluts=? WHERE id=?",
                                 (new_data['name'], new_data['surname'], new_data['email'], new_data['password'],
-                                 new_data['role'], user_id))
-            self.conn.commit()
-            return True
-        except sqlite3.Error as e:
-            print(f"Error updating user: {e}")
-            return False
+                                 new_data['role'], new_data['number_of_pluts'] user_id))
+                conn.commit()
+                return True
+            except sqlite3.Error as e:
+                print(f"Error updating user: {e}")
+                return False
 
     def get_user_by_id(self, user_id):
-        self.cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
-        row = self.cursor.fetchone()
-        if row:
-            return User(*row)
-        return None
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE id=?", (user_id,))
+            row = cursor.fetchone()
+            if row:
+                return User(*row)
+            return None
 
-
+    def login(self, email, password):
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM users WHERE email=? AND password=?", (email, password))
+            row = cursor.fetchone()
+            if row:
+                return User(*row)
+            else:
+                print(f"Invalid email or password")
+                return None
