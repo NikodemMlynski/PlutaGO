@@ -5,13 +5,14 @@ import sqlite3
 # print(logged_user)
 # print(logged_user.name)
 # print(logged_user.email)
-import streamlit as st
+# import streamlit as st
 
 st.title('PlutaGO')
 
 # conn = sqlite3.connect('plutaGO.db')
 # cursor = conn.cursor()
 # cursor.execute('select name from sqlite_master where type="table";')
+
 
 # tables = cursor.fetchall()
 

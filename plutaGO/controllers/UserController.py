@@ -12,9 +12,9 @@ class UserController(BaseController):
             cursor = conn.cursor()
             try:
                 cursor.execute("""
-                INSERT INTO users (name, surname, email, password, role, number_of_pluts)
-                VALUES (?, ?, ?, ?, ?)
-                """, (user.name, user.surname, user.email, user.password, user.role, user.number_of_pluts))
+                INSERT INTO users (name, surname, email, password, role, amount_of_pluts)
+                VALUES (?, ?, ?, ?, ?, ?)
+                """, (user.name, user.surname, user.email, user.password, user.role, user.amount_of_pluts))
                 conn.commit()
             except sqlite3.Error as e:
                 print(f"Database error: {e}")
@@ -37,13 +37,13 @@ class UserController(BaseController):
                 print(f"Error deleting user: {e}")
                 return False
 
-    def update(self, user_id, new_data):
+    def update(self, user_id, new_data: User):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute("UPDATE users SET name=?, surname=?, email=?, password=?, role=?, number_of_pluts=? WHERE id=?",
-                                (new_data['name'], new_data['surname'], new_data['email'], new_data['password'],
-                                 new_data['role'], new_data['number_of_pluts'] user_id))
+                cursor.execute("UPDATE users SET name=?, surname=?, email=?, password=?, role=?, amount_of_pluts=? WHERE id=?",
+                                (new_data.name, new_data.surname, new_data.email, new_data.password,
+                                 new_data.role, new_data.amount_of_pluts, user_id))
                 conn.commit()
                 return True
             except sqlite3.Error as e:

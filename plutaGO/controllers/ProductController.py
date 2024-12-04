@@ -33,12 +33,12 @@ class ProductController(BaseController):
             except sqlite3.Error as e:
                 print(f"Error deleting product: {e}")
 
-    def update(self, product_id, new_data):
+    def update(self, product_id, new_data: Product):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
                 cursor.execute("UPDATE products SET name=?, description=?, category_id=?, photo=?, price=? WHERE id=?",
-                               (new_data['name'], new_data['description'], new_data['category_id'], new_data['photo'], new_data['price'], product_id))
+                               (new_data.name, new_data.description, new_data.category_id, new_data.photo, new_data.price, product_id))
                 conn.commit()
             except sqlite3.Error as e:
                 print(f"Error updating user: {e}")
