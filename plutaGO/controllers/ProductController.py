@@ -12,7 +12,7 @@ class ProductController(BaseController):
                 cursor = conn.cursor()
                 cursor.execute("""
                 INSERT INTO products (name, description, category_id, photo, price)
-                VALUES (?, ?, ?, ?, ?)""", (product.name, product.description, product.category_id, product.photo, product.price))
+                VALUES (?, ?, ?, ?, ?)""", (product.name, product.description, product.category_id, product.price, product.photo))
                 conn.commit()
             except sqlite3.Error as e:
                 print(f"Database error: {e}")
