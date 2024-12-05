@@ -5,6 +5,10 @@ from models.User import User
 signin_tab, signup_tab = st.tabs(['Sign in ', 'Sign Up'])
 userController = UserController('plutaGO.db')
 
+if 'auth_data' not in st.session_state:
+    st.session_state.auth_data = None
+
+
 with signin_tab:
     st.subheader('Sign in')
     with st.form(key='signin_form'):
@@ -21,7 +25,10 @@ with signin_tab:
                 if not user:
                     st.error('Invalid email or password')
                 else:
-                    
+                    st.session_state['auth_data'] = {
+                        email: email,
+                        password: password
+                    }
                     st.success("Great!")
 
 with signup_tab:   

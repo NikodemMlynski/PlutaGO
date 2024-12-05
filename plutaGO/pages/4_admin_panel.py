@@ -25,7 +25,7 @@ with product_categories_tab:
     category = {
         "name": None
     }
-    with st.form(key='create_category_form'):
+    with st.form(key='create_category_form', clear_on_submit=True):
         st.subheader('Create category')
         category['name'] = st.text_input('Enter category name')
 
@@ -38,13 +38,14 @@ with product_categories_tab:
                 category = Category(id=None, name=category['name'])
                 categoryController.create(category)
                 st.success("Great!")
+                st.rerun()
             
 
     category_to_edit = {
         "id": categories[0].id,
         "name": categories[0].name
     }
-    with st.form(key='edit_category_form'):
+    with st.form(key='edit_category_form', clear_on_submit=True):
         st.subheader('Edit category')
         category_to_edit['id'] = st.selectbox('Id', [category.id for category in categories])
         category_to_edit['name'] = st.text_input('Enter category name', category_to_edit['name'])
@@ -86,42 +87,42 @@ with products_tab:
 
         
     
-    product = {
+    new_product = {
         'name': None,
         'description': None,
         'category_id': None,
         'photo': None,
         'price': None,
     }
-    with st.form(key='create_product_form'):
+    with st.form(key='create_product_form', clear_on_submit=True):
         st.subheader('Create product')
-        product['name'] = st.text_input('Enter product name')
-        product['description'] = st.text_area('Enter product description')
+        new_product['name'] = st.text_input('Enter product name')
+        new_product['description'] = st.text_area('Enter product description')
         selected_name = st.selectbox('categoryId', [category.name for category in categories])
-        product['category_id'] = [category for category in categories if category.name == selected_name][0].id
-        product['photo'] = st.text_input('Enter link to product photo')
-        product['price'] = st.number_input('Enter product price (PLT)')
+        new_product['category_id'] = [category for category in categories if category.name == selected_name][0].id
+        new_product['photo'] = st.text_input('Enter link to product photo')
+        new_product['price'] = st.number_input('Enter product price (PLT)')
 
         submit_button = st.form_submit_button(label='Create')
         
         if submit_button:
-            if not all (product.values()):
+            if not all (new_product.values()):
                 st.warning('Please fill all the field')
             else:
-                pass
-                product = Product(**{"id": None, **product})
+                product = Product(**{"id": None, **new_product})
                 productController.create(product)
                 st.success("Great!")
+                st.rerun()
     
     product_to_edit = {
-        "id": products[0].id, 
+        "id": products[0].id if products else None, 
         "name": None,
         "description": None,
         "category_id": None,
         "photo": None,
         "price": None,
     }
-    with st.form(key='edit_product_form'):
+    with st.form(key='edit_product_form', clear_on_submit=True):
         st.subheader('Edit product')
         product_to_edit['id'] = st.selectbox('Id', [product.id for product in products])
         product_to_edit['name'] = st.text_input('Enter product name', product_to_edit['name'])
