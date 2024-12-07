@@ -4,6 +4,8 @@ from controllers.categoryController import CategoryController
 from models.Category import Category
 from controllers.ProductController import ProductController
 from models.Product import Product
+from controllers.OrderPositionController import OrderPositionController
+from models.Order_position import OrderPosition
 
 from controllers.OrderController import OrderController
 
@@ -60,8 +62,9 @@ with product_categories_tab:
                 st.success('Great')
                 st.rerun()
     
-    def deleteHandler(id):
+    def deleteCategoryHandler(id):
         categoryController.delete(id)
+        st.rerun()
     with st.container(border=True):
         for category in categories:
             c_id, c_name, c_button = st.columns(3)
@@ -70,11 +73,11 @@ with product_categories_tab:
             with c_name:
                 st.write(category.name)
             with c_button:
-                st.button('Delete', key=f'button_category_{category.id}', on_click=deleteHandler, args=(category.id, ))
+                st.button('Delete', key=f'button_category_{category.id}', on_click=deleteCategoryHandler, args=(category.id, ))
 
 
 with products_tab:
-    productController = ProductController('PlutaGO.db')
+    productController = ProductController('plutaGO.db')
     with st.container(border=True):
         products = productController.get_all()
         products_dict = [product.__dict__ for product in products]
@@ -143,8 +146,9 @@ with products_tab:
                 st.success('Great')
                 st.rerun()
     
-    def deleteHandler(id):
+    def deleteProductHandler(id):
         productController.delete(id)
+        st.rerun()
     with st.container(border=True):
         for product in products:
             c_id, c_name, c_button = st.columns(3)
@@ -153,10 +157,10 @@ with products_tab:
             with c_name:
                 st.write(product.name)
             with c_button:
-                st.button('Delete', key=f'button_product_{product.id}', on_click=deleteHandler, args=(product.id, ))
+                st.button('Delete', key=f'button_product_{product.id}', on_click=deleteProductHandler, args=(product.id, ))
 
 with orders_tab:
-    orderController = OrderController('PlutaGO.db')
+    orderController = OrderController('plutaGO.db')
     with st.container(border=True):
         orders = orderController.get_all()
         orders_dict = [order.__dict__ for order in orders]
@@ -167,24 +171,46 @@ with orders_tab:
         else: 
             st.write('There are not orders yet')
 
-    def deleteHandler(id):
-        productController.delete(id)
+    orders = orderController.get_all()
+    def deleteOrderHandler(id):
+        orderController.delete(id)
+        orderPositionController.delete_by_order_id(id)
+        st.rerun()
     with st.container(border=True):
-        for product in products:
-            c_id, c_name, c_button = st.columns(3)
+        for order in orders:
+            c_id, c_user_id, c_date, c_status, c_address_id, c_button = st.columns(6)
             with c_id:
-                st.write(product.id)
-            with c_name:
-                st.write(product.name)
+                st.write(order.id)
+            with c_user_id:
+                st.write(order.user_id)
+            with c_date:
+                st.write(order.date)
+            with c_address_id:
+                st.write(order.address_id)
+            with c_status:
+                st.write(order.status)
             with c_button:
-                st.button('Delete', key=f'button_order_{product.id}', on_click=deleteHandler, args=(product.id, ))
+                st.button('Delete', key=f'button_order_{order.id}', on_click=deleteOrderHandler, args=(order.id, ))
+    
+    with st.container(border=True):
+        order_id = st.selectbox('orderId', [order.id for order in orders])
+        orderPositionController = OrderPositionController(db_path='plutaGO.db')
+        order_positions = orderPositionController.get_order_positions_by_order_id(order_id)
+    
+        df = pd.DataFrame([order_position.__dict__ for order_position in order_positions])
+        
+        if df.size > 0:
+            df = df.set_index('id')
 
-# product = {
-#     name: None,
-#     description: None,
-#     category_id: None,
-#     photo: None,
-#     price: None,
-# }
-# with st.form(key='add_product_form'):
+            def get_product_details(product_id):
+                product = productController.get_product_by_id(product_id)
+                return product.name, product.price  
+
+            df[['name', 'price']] = df['product_id'].apply(get_product_details).tolist()
+            st.table(df)
+            df['totalPrice'] = df['amount'] * float(df['price'])
+            totalPrice = df['totalPrice'].sum()
+            st.subheader(f'Total price: {totalPrice} PLT')
+                
+
     
