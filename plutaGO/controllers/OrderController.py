@@ -10,9 +10,12 @@ class OrderController(BaseController):
             try:
                 cursor = conn.cursor()
                 cursor.execute("""
-                INSERT INTO order (user_id, date, status, address_id)
+                INSERT INTO orders (user_id, date, status, address_id)
                 VALUES (?, ?, ?, ?)""", (order.user_id, order.date, order.status, order.address_id))
+                order_id = cursor.lastrowid
+                print(order_id)
                 conn.commit()
+                return order_id
             except sqlite3.Error as e:
                 print(f"Database error: {e}")
 
@@ -36,7 +39,7 @@ class OrderController(BaseController):
         with self.get_db_connection() as conn:
             try:
                 cursor = conn.cursor()
-                cursor.execute("UPDATE order SET user_id=?, date=?, status=?, address_id=? WHERE id=?",
+                cursor.execute("UPDATE orders SET user_id=?, date=?, status=?, address_id=? WHERE id=?",
                                     (new_data['user_id'], new_data['date'], new_data['status']), new_data['address_id'], order_id)
                 conn.commit()
             except sqlite3.Error as e:

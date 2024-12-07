@@ -45,7 +45,7 @@ class ProductController(BaseController):
 
     def get_product_by_id(self, product_id):
         with self.get_db_connection() as conn:
-            cursor = conn.cusror()
+            cursor = conn.cursor()
             cursor.execute("SELECT * FROM products WHERE id=?", (product_id, ))
             row = cursor.fetchone()
             if row:
