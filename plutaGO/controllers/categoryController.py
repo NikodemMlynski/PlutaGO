@@ -37,12 +37,12 @@ class CategoryController(BaseController):
                 print(f"Error deleting category: {e}")
                 return False
 
-    def update(self, category_id, new_data):
+    def update(self, category_id, new_data: Category):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
                 cursor.execute("UPDATE categories SET name=? WHERE id=?",
-                                (new_data['name'], category_id))
+                                (new_data.name, category_id))
                 conn.commit()
                 return True
             except sqlite3.Error as e:
