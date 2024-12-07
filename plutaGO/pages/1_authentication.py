@@ -1,58 +1,55 @@
 import streamlit as st
+from components.authentication import sign_up_form, sign_in_form
+from models.Address import Address
+from controllers.AddressController import AddressController
 
-from controllers.UserController import UserController
-from models.User import User
-signin_tab, signup_tab = st.tabs(['Sign in ', 'Sign Up'])
-userController = UserController('plutaGO.db')
-
+addressController = AddressController(db_path='plutaGO.db')
 if 'auth_data' not in st.session_state:
-    st.session_state.auth_data = None
+    st.session_state.auth_data = {}
+    
 
-
+signin_tab, signup_tab = st.tabs(['Sign in ', 'Sign Up'])
 with signin_tab:
     st.subheader('Sign in')
-    with st.form(key='signin_form'):
-        email = st.text_input('Enter email')
-        password = st.text_input('Enter password')
+    sign_in_form(key='sign_in')
+    
+def address_form(user_id):
+    address_data = {
+        "city": None,
+        "street": None,
+        "local_number": None
+    }
+    with st.form(key='add_address_form'):
+        address_data['city'] = st.text_input('Enter city')
+        address_data['street'] = st.text_input('Enter street')
+        address_data['local_number'] = st.text_input('Enter local number')
 
-        submit_button = st.form_submit_button(label='Sign in')
+        submit_button = st.form_submit_button(label='Submit')
 
         if submit_button:
-            if len(email) < 4 or len(password) < 4:
-                st.warning('Please fill all the field')
+            if not all(address_data.values()):
+                st.warning('Plaese provide all data')
             else:
-                user = userController.login(email=email, password=password)
-                if not user:
-                    st.error('Invalid email or password')
-                else:
-                    st.session_state['auth_data'] = {
-                        email: email,
-                        password: password
-                    }
-                    st.success("Great!")
+                new_address = Address(**{"id": None, "user_id": user_id, **address_data})
+                addressController.create(new_address)
+                st.success('Great!')
 
 with signup_tab:   
     st.subheader('Sign up') 
-    sign_up_data = {
-        "name": None,
-        "surname": None,
-        "email": None,
-        "password": None,
-        "role": None,
-    }
-    with st.form(key='signup_form'):
-        sign_up_data['name'] = st.text_input('Enter name')
-        sign_up_data['surname'] = st.text_input('Enter surname')
-        sign_up_data['email'] = st.text_input('Enter email')
-        sign_up_data['password'] = st.text_input('Enter password')
-        sign_up_data['role'] = st.text_input('Enter role')
+    
+    sign_up_form(key='sign_up')
 
-        submit_button = st.form_submit_button(label='Sign up')
-
-        if submit_button:
-            if not all(sign_up_data.values()):
-                st.warning('Please provide all data')
+with st.container():
+    if 'user' in st.session_state.auth_data:
+        user = st.session_state.auth_data['user']
+        if user:
+            st.subheader('You adress')
+            address = addressController.get_address_by_user_id(user.id)
+            if address:
+                st.write(address.__dict__)
             else:
-                new_user = User(**{"id": None,"amount_of_pluts": 0, **sign_up_data})
-                userController.create(new_user)
+                st.write('You did not provide your addres. Please fill up the form below')
+                address_form(user.id)
 
+        else:
+            st.subheader('You are not logged in')
