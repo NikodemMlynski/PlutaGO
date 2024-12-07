@@ -44,7 +44,8 @@ CREATE TABLE address (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     street TEXT,
     city TEXT,
-    local_number INTEGER
+    local_number INTEGER,
+    user_id INTEGER
 )
 
 CREATE TABLE categories (
