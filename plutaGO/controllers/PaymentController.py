@@ -1,20 +1,21 @@
 import sqlite3
 from models.User import User
 from .BaseController import BaseController
+from models.Payment import Payment
 
 
 class PaymentController(BaseController):
     def __init__(self, db_path):
         super().__init__(db_path)
 
-    def create(self, payment):
+    def create(self, payment: Payment):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
                 cursor.execute("""
-                INSERT INTO payments (user_id, order_id, price, amount, status, date)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """, (payment.user_id, payment.order_id, payment.price, payment.amount, payment.status, payment.date))
+                INSERT INTO payments (user_id, order_id, amount, date)
+                VALUES (?, ?, ?, ?)
+                """, (payment.user_id, payment.order_id, payment.amount, payment.date))
                 conn.commit()
             except sqlite3.Error as e:
                 print(f"Database error: {e}")
@@ -59,3 +60,10 @@ class PaymentController(BaseController):
             if row:
                 return Payment(*row)
             return None
+
+    def get_all_payments_for_user(self, user_id):
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM payments WHERE user_id=?", (user_id,))
+            rows = cursor.fetchall()
+            return [Payment(*row) for row in rows ]

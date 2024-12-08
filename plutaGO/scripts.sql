@@ -37,6 +37,7 @@ CREATE TABLE payment (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     order_id INTEGER,
     amount DOUBLE,
+    user_id INTEGER,
     date DATE
 )
 
