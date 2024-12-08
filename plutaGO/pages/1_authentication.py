@@ -2,7 +2,8 @@ import streamlit as st
 from components.authentication import sign_up_form, sign_in_form
 from models.Address import Address
 from controllers.AddressController import AddressController
-
+from controllers.UserController import UserController
+from controllers.PaymentController import PaymentController
 addressController = AddressController(db_path='plutaGO.db')
 if 'auth_data' not in st.session_state:
     st.session_state.auth_data = {}
@@ -53,3 +54,30 @@ with st.container():
 
         else:
             st.subheader('You are not logged in')
+
+with st.container():
+    if 'user' in st.session_state.auth_data:
+        user = st.session_state.auth_data['user']
+        if user:
+            st.subheader('Manage your balance')
+            st.write(f'Your balance: {user.amount_of_pluts} PLT')
+
+            with st.form(key='add_plutas_form'):
+                plutas_to_add = st.number_input('Enter value [PLT]')
+                submit_button = st.form_submit_button(label='Add pluts')
+                
+                if submit_button:
+                    if plutas_to_add > 0:
+                        userController = UserController(db_path='plutaGO.db')
+                        user.increase_pluts(plutas_to_add)
+                        userController.update(user_id=user.id, new_data=user)
+                        st.rerun()
+                    else:
+                        st.warning('Please provide correct number of PLT')
+
+with st.container():
+    if 'user' in st.session_state.auth_data:
+        user = st.session_state.auth_data['user']
+        if user:
+            paymentController = PaymentController(db_path='plutaGO.db')
+            payments = paymentController.get_all_payments_for_user(user.id)

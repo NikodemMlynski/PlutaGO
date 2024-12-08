@@ -5,35 +5,47 @@ from models.Order import Order
 from controllers.OrderPositionController import OrderPositionController
 from models.Order_position import OrderPosition
 from controllers.PaymentController import PaymentController
+from models.Payment import Payment
 from components.authentication import sign_up_form, sign_in_form
 from controllers.AddressController import AddressController
 from models.Address import Address
+from controllers.UserController import UserController
 st.title('Cart')
-# st.write('Trzeba zaimplementowac funkcje tworzaca zamowienie')
-# st.write('Tworzaca platnosc')
-# st.write('I odejmowanie z konta uzytkownikowi')
-
 
 
 def make_order(products):
     if 'auth_data' in st.session_state and 'user' in st.session_state['auth_data']:
         user = st.session_state['auth_data']['user']
-        addressController = AddressController(db_path='plutaGO.db')
-        user_address = addressController.get_address_by_user_id(user.id)
-        if user_address:
-            st.subheader('Teraz tu trzeba dodac juz logike zamowienia')
-            orderController = OrderController(db_path='plutaGO.db')
-            new_order = Order(id=None, user_id=user.id, date=datetime.now(), status='not_paid', address_id=user_address.id)
-            new_order_id = orderController.create(new_order)
-            for product in products:
-                new_order_position = OrderPosition(id=None, order_id=new_order_id, product_id=product['product'].id, amount=product['quantity'])
-                orderPositionController = OrderPositionController(db_path='plutaGO.db')
-                orderPositionController.create(new_order_position)
+        total_cost = round(sum([float(product['product'].price) * product['quantity'] for product in products ]))
 
+        if user.amount_of_pluts >= total_cost:
+            addressController = AddressController(db_path='plutaGO.db')
+            user_address = addressController.get_address_by_user_id(user.id)
+            if user_address:
+                orderController = OrderController(db_path='plutaGO.db')
+                order_date = datetime.now()
+                new_order = Order(id=None, user_id=user.id, date=order_date, status='ordered', address_id=user_address.id)
+                new_order_id = orderController.create(new_order)
+                for product in products:
+                    new_order_position = OrderPosition(id=None, order_id=new_order_id, product_id=product['product'].id, amount=product['quantity'])
+                    orderPositionController = OrderPositionController(db_path='plutaGO.db')
+                    orderPositionController.create(new_order_position)
+                    st.success('Successfuly ordered')
+                    st.session_state.cart = {
+                        "products": []
+                    }
+                    paymentController = PaymentController(db_path='plutaGO.db')
+                    userController = UserController(db_path='plutaGO.db')
+                    user.make_payment(total_cost)
+                    userController.update(user.id, user)
+                    payment = Payment(id=None, user_id=user.id, order_id=new_order_id, amount=total_cost, date=order_date)
+                    paymentController.create(payment)
+            else:
+                st.subheader('Dodaj adres do swojego konta na stronie authentication')
         else:
-            st.subheader('Dodaj adres do swojego konta na stronie authentication')
-        # przechodzimy do tworzenia platnosci itp
-        pass
+            st.error(f'UUUU masz za mało plut')
+
+        
     else:
         # zrobic logowanie i wywolac funkcje jeszcze raz
         st.subheader('Zaloguj się i wróć do karty')
