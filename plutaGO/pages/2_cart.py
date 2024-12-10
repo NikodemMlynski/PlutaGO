@@ -30,16 +30,16 @@ def make_order(products):
                     new_order_position = OrderPosition(id=None, order_id=new_order_id, product_id=product['product'].id, amount=product['quantity'])
                     orderPositionController = OrderPositionController(db_path='plutaGO.db')
                     orderPositionController.create(new_order_position)
-                    st.success('Successfuly ordered')
                     st.session_state.cart = {
                         "products": []
                     }
-                    paymentController = PaymentController(db_path='plutaGO.db')
-                    userController = UserController(db_path='plutaGO.db')
-                    user.make_payment(total_cost)
-                    userController.update(user.id, user)
-                    payment = Payment(id=None, user_id=user.id, order_id=new_order_id, amount=total_cost, date=order_date)
-                    paymentController.create(payment)
+                st.success('Zamówienia się powiodło')
+                paymentController = PaymentController(db_path='plutaGO.db')
+                userController = UserController(db_path='plutaGO.db')
+                user.make_payment(total_cost)
+                userController.update(user.id, user)
+                payment = Payment(id=None, user_id=user.id, order_id=new_order_id, amount=total_cost, date=order_date)
+                paymentController.create(payment)
             else:
                 st.subheader('Dodaj adres do swojego konta na stronie authentication')
         else:
@@ -52,7 +52,7 @@ def make_order(products):
         
 
 if "cart" not in st.session_state or len(st.session_state['cart']['products']) == 0:
-    st.write('Your cart is empty')
+    st.write('Dodaj coś do karty na stronie main')
 else:
     with st.container(border=True):
         products = st.session_state['cart']['products']
@@ -67,8 +67,8 @@ else:
         total_cost = sum([float(product['product'].price) * product['quantity'] for product in products ])
         col_left, col_right = st.columns(2)
         with col_left:
-            st.subheader(f'Total cost: {total_cost} PLT')
+            st.subheader(f'Łączna cena: {total_cost} PLT')
         with col_right:
-            st.button(label='Buy', on_click=make_order, args=(products, ))
+            st.button(label='Kup', on_click=make_order, args=(products, ))
         
 

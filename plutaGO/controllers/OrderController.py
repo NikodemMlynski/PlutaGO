@@ -47,8 +47,28 @@ class OrderController(BaseController):
 
     def get_order_by_id(self, order_id):
         with self.get_db_connection() as conn:
+            cursor = conn.cursor()
             cursor.execute("SELECT * FROM orders where id=?", (order_id,))
             row = cursor.fetchone()
             if row:
                 return Order(*row)
             return None
+        
+    def get_orders_for_user(self, user_id):
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM orders where user_id=?", (user_id,))
+            rows = cursor.fetchall()
+            return [Order(*row) for row in rows]
+        
+    def update_order_status(self, order_id, status):
+        with self.get_db_connection() as conn:
+            try:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE orders SET status = ? WHERE id = ?', (status, order_id,))
+                conn.commit()
+
+            except sqlite3.Error as e:
+                print(f"Error updating order status {e}")
+
+            
