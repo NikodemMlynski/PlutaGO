@@ -12,9 +12,9 @@ class OrderPositionController(BaseController):
             cursor = conn.cursor()
             try:
                 cursor.execute("""
-                INSERT INTO order_positions (order_id, product_id, description, category_id, photo, price)
-                VALUES (?, ?, ?, ?, ?, ?)
-                """, (order_position.order_id, order_position.product_id, order_position.description, order_position.category_id, order_position.photo, order_position.price))
+                INSERT INTO order_position (order_id, product_id, amount)
+                VALUES (?, ?, ?)
+                """, (order_position.order_id, order_position.product_id, order_position.amount))
                 conn.commit()
             except sqlite3.Error as e:
                 print(f"Database error: {e}")
@@ -22,7 +22,7 @@ class OrderPositionController(BaseController):
     def get_all(self):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute('SELECT * FROM order_positions')
+            cursor.execute('SELECT * FROM order_position')
             rows = cursor.fetchall()
             return [OrderPosition(*row) for row in rows]
 
@@ -30,7 +30,7 @@ class OrderPositionController(BaseController):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
             try:
-                cursor.execute("DELETE FROM order_positions WHERE id=?", (order_position_id,))
+                cursor.execute("DELETE FROM order_position WHERE id=?", (order_position_id,))
                 conn.commit()
                 return True
             except sqlite3.Error as e:
@@ -42,7 +42,7 @@ class OrderPositionController(BaseController):
             cursor = conn.cursor()
             try:
                 cursor.execute("""
-                UPDATE order_positions SET order_id=?, product_id=?, description=?, category_id=?, photo=?, price=?
+                UPDATE order_position SET order_id=?, product_id=?, description=?, category_id=?, photo=?, price=?
                 WHERE id=?
                 """, (new_data['order_id'], new_data['product_id'], new_data['description'], new_data['category_id'], new_data['photo'], new_data['price'], order_position_id))
                 conn.commit()
@@ -54,8 +54,21 @@ class OrderPositionController(BaseController):
     def get_order_position_by_id(self, order_position_id):
         with self.get_db_connection() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM order_positions WHERE id=?", (order_position_id,))
+            cursor.execute("SELECT * FROM order_position WHERE id=?", (order_position_id,))
             row = cursor.fetchone()
             if row:
                 return OrderPosition(*row)
             return None
+
+    def get_order_positions_by_order_id(self, order_id):
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM order_position WHERE order_id=?", (order_id, ))
+            rows = cursor.fetchall()
+            order_positions = [OrderPosition(*order_position) for order_position in rows]
+            return order_positions
+    
+    def delete_by_order_id(self, order_id):
+        with self.get_db_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM order_position WHERE order_id = ?", (order_id, ))
