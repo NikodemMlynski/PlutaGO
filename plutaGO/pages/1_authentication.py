@@ -34,6 +34,7 @@ def address_form(user_id):
                 new_address = Address(**{"id": None, "user_id": user_id, **address_data})
                 addressController.create(new_address)
                 st.success('Great!')
+                st.rerun()
 
 with signup_tab:   
     st.subheader('Sign up') 

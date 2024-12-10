@@ -193,6 +193,7 @@ with orders_tab:
                 st.button('Delete', key=f'button_order_{order.id}', on_click=deleteOrderHandler, args=(order.id, ))
     
     with st.container(border=True):
+        st.subheader('Order positions')
         order_id = st.selectbox('orderId', [order.id for order in orders])
         orderPositionController = OrderPositionController(db_path='plutaGO.db')
         order_positions = orderPositionController.get_order_positions_by_order_id(order_id)
@@ -208,8 +209,8 @@ with orders_tab:
 
             df[['name', 'price']] = df['product_id'].apply(get_product_details).tolist()
             st.table(df)
-            df['totalPrice'] = df['amount'] * float(df['price'])
-            totalPrice = df['totalPrice'].sum()
+            df['totalPrice'] = df['amount'] * df['price'].astype(float)
+            totalPrice = round(df['totalPrice'].sum(), 2)
             st.subheader(f'Total price: {totalPrice} PLT')
                 
 
