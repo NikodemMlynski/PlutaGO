@@ -1,9 +1,5 @@
 import streamlit as st
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-sns.set()
-sns.set_palette('colorblind')
 from controllers.ProductController import ProductController
 from controllers.OrderPositionController import OrderPositionController
 orderedProductsTab, ordersTab, categoriesTab, usersTab = st.tabs(['Products', 'Orders', 'Categories', 'Users']) 
